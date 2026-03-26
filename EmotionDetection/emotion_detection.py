@@ -12,9 +12,21 @@ def emotion_detector(text_to_analyze:str) -> dict:
 
     # Sending a POST request to the emotion detector API
     response = requests.post(url, json=request_body, headers=request_headers)
-    
-    # Formatting the response into json
     formatted_response = json.loads(response.text)
 
-    #Returning the first item from the emotionPredictions list
-    return formatted_response['emotionPredictions'][0]['emotion']
+    if response.status_code == 200: 
+        # In case of status_code 200 display emotions dict 
+        emotions = formatted_response['emotionPredictions'][0]['emotion']
+        emotions['dominant_emotion'] = max(emotions,key=emotions.get)
+    elif response.status_code == 400:
+        # In case of empty input return a response with null values
+        return {
+            'anger': None,
+            'disgust': None,
+            'fear': None,
+            'joy': None,
+            'sadness': None,
+            'dominant_emotion': None
+        }
+
+    return emotions
